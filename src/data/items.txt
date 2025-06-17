@@ -1,0 +1,5 @@
+Basic T-Shirt,Shirts,19.99
+Slim Jeans,Pants,39.99
+Beanie,Accessories,9.99
+Hoodie,Shirts,29.99
+Sneakers,Shoes,59.99

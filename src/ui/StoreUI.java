@@ -1,0 +1,273 @@
+package ui;
+
+import logic.CartManager;
+import logic.InventoryManager;
+import models.ClothingItem;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class StoreUI {
+    private InventoryManager inventoryManager;
+    private CartManager cartManager;
+
+    public StoreUI() {
+        inventoryManager = new InventoryManager();
+        inventoryManager.loadInventory("src/data/items.txt");
+
+        cartManager = new CartManager();
+        createAndShowGUI();
+    }
+
+    private void updateItemSelector(JComboBox<String> itemSelector, JTextArea itemsArea, String filterCategory) {
+        itemSelector.removeAllItems();
+        itemsArea.setText("Available Products:\n");
+
+        for (ClothingItem item : inventoryManager.getInventory()) {
+            if (filterCategory.equals("All") || item.getCategory().equalsIgnoreCase(filterCategory)) {
+                itemSelector.addItem(item.toString());
+                itemsArea.append(item.toString() + "\n");
+            }
+        }
+    }
+
+    private void createAndShowGUI() {
+        JFrame frame = new JFrame("Fit & Fresh Clothing Store");
+
+        String[] categories = {"All", "Shirts", "Pants", "Accessories", "Shoes"};
+        JComboBox<String> categoryFilter = new JComboBox<>(categories);
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 500);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+
+        JComboBox<String> itemSelector = new JComboBox<>();
+        JTextArea itemsArea = new JTextArea();
+        itemsArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(itemsArea);
+
+        for (ClothingItem item : inventoryManager.getInventory()) {
+            itemSelector.addItem(item.toString());
+        }
+
+        JButton addButton = new JButton("Add to Cart");
+        JButton viewCartButton = new JButton("View Cart");
+
+        JButton adminButton = new JButton("Admin Panel");
+        adminButton.addActionListener(e -> {
+            String selectedCategory = (String) categoryFilter.getSelectedItem();
+            showAdminPanel(frame, itemSelector, itemsArea, selectedCategory);
+        });
+
+        addButton.addActionListener(e -> {
+            int selectedIndex = itemSelector.getSelectedIndex();
+            if (selectedIndex >= 0) {
+                ClothingItem selectedItem = inventoryManager.getInventory().get(selectedIndex);
+                cartManager.addToCart(selectedItem);
+                JOptionPane.showMessageDialog(frame, selectedItem.getName() + " added to cart.");
+            }
+        });
+
+        viewCartButton.addActionListener(e -> {
+            java.util.List<ClothingItem> cartItems = cartManager.getCartItems();
+
+            if (cartItems.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Your cart is empty.", "Shopping Cart", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            // Build the cart display string + total cost
+            StringBuilder cartDisplay = new StringBuilder();
+            double totalCost = 0;
+            for (ClothingItem item : cartItems) {
+                cartDisplay.append(item.toString()).append("\n");
+                totalCost += item.getPrice();
+            }
+            cartDisplay.append("\nTotal Cost: $").append(String.format("%.2f", totalCost));
+
+            String[] options = {"Remove Item", "Checkout", "Cancel"};
+
+            int choice = JOptionPane.showOptionDialog(
+                    frame,
+                    cartDisplay.toString(),
+                    "Shopping Cart",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null,
+                    options,
+                    options[2]
+            );
+
+            if (choice == 0) { // Remove Item
+                String[] itemOptions = new String[cartItems.size()];
+                for (int i = 0; i < cartItems.size(); i++) {
+                    itemOptions[i] = cartItems.get(i).toString();
+                }
+
+                String selected = (String) JOptionPane.showInputDialog(
+                        frame,
+                        "Select an item to remove:",
+                        "Remove Item",
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        itemOptions,
+                        itemOptions[0]
+                );
+
+                if (selected != null) {
+                    for (ClothingItem item : cartItems) {
+                        if (item.toString().equals(selected)) {
+                            cartManager.removeFromCart(item);
+                            JOptionPane.showMessageDialog(frame, item.getName() + " removed from cart.");
+                            break;
+                        }
+                    }
+                }
+            } else if (choice == 1) { // Checkout
+                int confirm = JOptionPane.showConfirmDialog(
+                        frame,
+                        "Confirm purchase for $" + String.format("%.2f", totalCost) + "?",
+                        "Confirm Checkout",
+                        JOptionPane.YES_NO_OPTION
+                );
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    cartManager.clearCart();
+                    JOptionPane.showMessageDialog(frame, "Thank you for your purchase!");
+                }
+            }
+            // If cancel or closed, do nothing
+        });
+
+        categoryFilter.addActionListener(e -> {
+            String selectedCategory = (String) categoryFilter.getSelectedItem();
+            updateItemSelector(itemSelector, itemsArea, selectedCategory);
+        });
+
+        JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
+
+        JPanel filterPanel = new JPanel();
+        filterPanel.add(new JLabel("Filter:"));
+        filterPanel.add(categoryFilter);
+
+        JPanel actionPanel = new JPanel();
+        actionPanel.add(itemSelector);
+        actionPanel.add(addButton);
+        actionPanel.add(viewCartButton);
+        actionPanel.add(adminButton);
+
+        bottomPanel.add(filterPanel);
+        bottomPanel.add(actionPanel);
+
+        itemsArea.setText("Available Products:\n");
+        for (ClothingItem item : inventoryManager.getInventory()) {
+            itemsArea.append(item.toString() + "\n");
+        }
+
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        frame.setContentPane(mainPanel);
+        frame.setVisible(true);
+
+    }
+
+    private void showAdminPanel(JFrame parentFrame, JComboBox<String> itemSelector, JTextArea itemsArea, String currentCategory) {
+        JDialog adminDialog = new JDialog(parentFrame, "Admin Panel", true);
+        adminDialog.setSize(400, 300);
+        adminDialog.setLayout(new BorderLayout());
+
+        // Item list
+        DefaultListModel<ClothingItem> listModel = new DefaultListModel<>();
+        for (ClothingItem item : inventoryManager.getInventory()) {
+            listModel.addElement(item);
+        }
+
+        JList<ClothingItem> itemList = new JList<>(listModel);
+        itemList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane itemScrollPane = new JScrollPane(itemList);
+
+        // Buttons
+        JButton addItemButton = new JButton("Add Item");
+        JButton removeItemButton = new JButton("Remove Item");
+        JButton editItemButton = new JButton("Edit Item");
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(addItemButton);
+        buttonPanel.add(removeItemButton);
+        buttonPanel.add(editItemButton);
+
+        adminDialog.add(itemScrollPane, BorderLayout.CENTER);
+        adminDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add item logic
+        addItemButton.addActionListener(e -> {
+            JTextField nameField = new JTextField();
+            JTextField priceField = new JTextField();
+            JTextField categoryField = new JTextField();
+            Object[] inputs = {
+                    "Name:", nameField,
+                    "Price:", priceField,
+                    "Category:", categoryField
+            };
+
+            int result = JOptionPane.showConfirmDialog(adminDialog, inputs, "Add New Item", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                try {
+                    String name = nameField.getText();
+                    double price = Double.parseDouble(priceField.getText());
+                    String category = categoryField.getText();
+                    ClothingItem newItem = new ClothingItem(name, category, price);
+                    inventoryManager.addItem(newItem);
+                    listModel.addElement(newItem);
+                    updateItemSelector(itemSelector, itemsArea, currentCategory);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(adminDialog, "Invalid price input.");
+                }
+            }
+        });
+
+        // Remove item logic
+        removeItemButton.addActionListener(e -> {
+            ClothingItem selected = itemList.getSelectedValue();
+            if (selected != null) {
+                inventoryManager.removeItem(selected);
+                listModel.removeElement(selected);
+                updateItemSelector(itemSelector, itemsArea, currentCategory);
+            }
+        });
+
+        // Edit item logic
+        editItemButton.addActionListener(e -> {
+            ClothingItem selected = itemList.getSelectedValue();
+            if (selected != null) {
+                JTextField nameField = new JTextField(selected.getName());
+                JTextField priceField = new JTextField(String.valueOf(selected.getPrice()));
+                JTextField categoryField = new JTextField(selected.getCategory());
+                Object[] inputs = {
+                        "Name:", nameField,
+                        "Price:", priceField,
+                        "Category:", categoryField
+                };
+
+                int result = JOptionPane.showConfirmDialog(adminDialog, inputs, "Edit Item", JOptionPane.OK_CANCEL_OPTION);
+                if (result == JOptionPane.OK_OPTION) {
+                    try {
+                        selected.setName(nameField.getText());
+                        selected.setPrice(Double.parseDouble(priceField.getText()));
+                        selected.setCategory(categoryField.getText());
+                        itemList.repaint();
+                        updateItemSelector(itemSelector, itemsArea, currentCategory);
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(adminDialog, "Invalid price input.");
+                    }
+                }
+            }
+        });
+
+        adminDialog.setLocationRelativeTo(parentFrame);
+        adminDialog.setVisible(true);
+    }
+}
