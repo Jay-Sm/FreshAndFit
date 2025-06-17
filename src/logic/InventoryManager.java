@@ -16,11 +16,12 @@ public class InventoryManager {
             String line;
             while((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if(parts.length == 3) {
+                if(parts.length == 4) {
                     String name = parts[0];
                     String category = parts[1];
                     double price = Double.parseDouble(parts[2]);
-                    inventory.add(new ClothingItem(name, category, price));
+                    int stock = Integer.parseInt(parts[3]);
+                    inventory.add(new ClothingItem(name, category, price, stock));
                 }
             }
         } catch (IOException e) {

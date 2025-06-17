@@ -65,7 +65,21 @@ public class StoreUI {
             int selectedIndex = itemSelector.getSelectedIndex();
             if (selectedIndex >= 0) {
                 ClothingItem selectedItem = inventoryManager.getInventory().get(selectedIndex);
+
+                if (selectedItem.getStock() <= 0) {
+                    JOptionPane.showMessageDialog(frame, "Sorry, " + selectedItem.getName() + " is out of stock.", "Out of Stock", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 cartManager.addToCart(selectedItem);
+
+                // Reduce stock by 1 when added to cart
+                selectedItem.setStock(selectedItem.getStock() - 1);
+
+                // Update UI to reflect new stock
+                String selectedCategory = (String) categoryFilter.getSelectedItem();
+                updateItemSelector(itemSelector, itemsArea, selectedCategory);
+
                 JOptionPane.showMessageDialog(frame, selectedItem.getName() + " added to cart.");
             }
         });
@@ -101,6 +115,7 @@ public class StoreUI {
             );
 
             if (choice == 0) { // Remove Item
+
                 String[] itemOptions = new String[cartItems.size()];
                 for (int i = 0; i < cartItems.size(); i++) {
                     itemOptions[i] = cartItems.get(i).toString();
@@ -120,11 +135,20 @@ public class StoreUI {
                     for (ClothingItem item : cartItems) {
                         if (item.toString().equals(selected)) {
                             cartManager.removeFromCart(item);
+
+                            // Increase stock by 1
+                            item.setStock(item.getStock() + 1);
+
+                            // Update UI to show new stock
+                            String selectedCategory = (String) categoryFilter.getSelectedItem();
+                            updateItemSelector(itemSelector, itemsArea, selectedCategory);
+
                             JOptionPane.showMessageDialog(frame, item.getName() + " removed from cart.");
                             break;
                         }
                     }
                 }
+
             } else if (choice == 1) { // Checkout
                 int confirm = JOptionPane.showConfirmDialog(
                         frame,
@@ -139,6 +163,8 @@ public class StoreUI {
                 }
             }
             // If cancel or closed, do nothing
+
+
         });
 
         categoryFilter.addActionListener(e -> {
@@ -207,10 +233,12 @@ public class StoreUI {
             JTextField nameField = new JTextField();
             JTextField priceField = new JTextField();
             JTextField categoryField = new JTextField();
+            JTextField stockField = new JTextField();
             Object[] inputs = {
                     "Name:", nameField,
                     "Price:", priceField,
-                    "Category:", categoryField
+                    "Category:", categoryField,
+                    "Stock:", stockField
             };
 
             int result = JOptionPane.showConfirmDialog(adminDialog, inputs, "Add New Item", JOptionPane.OK_CANCEL_OPTION);
@@ -219,7 +247,8 @@ public class StoreUI {
                     String name = nameField.getText();
                     double price = Double.parseDouble(priceField.getText());
                     String category = categoryField.getText();
-                    ClothingItem newItem = new ClothingItem(name, category, price);
+                    int stock = Integer.parseInt(stockField.getText());
+                    ClothingItem newItem = new ClothingItem(name, category, price, stock);
                     inventoryManager.addItem(newItem);
                     listModel.addElement(newItem);
                     updateItemSelector(itemSelector, itemsArea, currentCategory);
@@ -246,11 +275,14 @@ public class StoreUI {
                 JTextField nameField = new JTextField(selected.getName());
                 JTextField priceField = new JTextField(String.valueOf(selected.getPrice()));
                 JTextField categoryField = new JTextField(selected.getCategory());
+                JTextField stockField = new JTextField(String.valueOf(selected.getStock()));
                 Object[] inputs = {
                         "Name:", nameField,
                         "Price:", priceField,
-                        "Category:", categoryField
+                        "Category:", categoryField,
+                        "Stock:", stockField
                 };
+                selected.setStock(Integer.parseInt(stockField.getText()));
 
                 int result = JOptionPane.showConfirmDialog(adminDialog, inputs, "Edit Item", JOptionPane.OK_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
@@ -258,6 +290,7 @@ public class StoreUI {
                         selected.setName(nameField.getText());
                         selected.setPrice(Double.parseDouble(priceField.getText()));
                         selected.setCategory(categoryField.getText());
+                        selected.setStock(Integer.parseInt(stockField.getText()));
                         itemList.repaint();
                         updateItemSelector(itemSelector, itemsArea, currentCategory);
                     } catch (NumberFormatException ex) {

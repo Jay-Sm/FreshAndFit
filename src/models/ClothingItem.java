@@ -4,11 +4,13 @@ public class ClothingItem {
     private String name;
     private String category;
     private double price;
+    private int stock;
 
-    public ClothingItem(String name, String category, double price) {
+    public ClothingItem(String name, String category, double price, int stock) {
         this.name = name;
         this.category = category;
         this.price = price;
+        this.stock = stock;
     }
 
     public String getName() {
@@ -23,8 +25,13 @@ public class ClothingItem {
         return price;
     }
 
+    public int getStock() {
+        return stock;
+    }
+
+    @Override
     public String toString() {
-        return name + " (" + category + ") - $" + String.format("%.2f", price);
+        return name + " - $" + price + " - " + category + " (Stock: " + stock + ")";
     }
 
     public void setName(String name) {
@@ -38,4 +45,9 @@ public class ClothingItem {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
 }
