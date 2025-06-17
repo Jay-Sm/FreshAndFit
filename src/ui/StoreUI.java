@@ -39,7 +39,7 @@ public class StoreUI {
         JComboBox<String> categoryFilter = new JComboBox<>(categories);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 500);
+        frame.setSize(700, 500);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
@@ -60,6 +60,8 @@ public class StoreUI {
             String selectedCategory = (String) categoryFilter.getSelectedItem();
             showAdminPanel(frame, itemSelector, itemsArea, selectedCategory);
         });
+
+        JButton previewButton = new JButton("Preview Item");
 
         addButton.addActionListener(e -> {
             int selectedIndex = itemSelector.getSelectedIndex();
@@ -167,6 +169,45 @@ public class StoreUI {
 
         });
 
+        previewButton.addActionListener(e -> {
+            int selectedIndex = itemSelector.getSelectedIndex();
+            if (selectedIndex >= 0) {
+                ClothingItem selectedItem = inventoryManager.getInventory().get(selectedIndex);
+
+                // Create panel for preview
+                JPanel previewPanel = new JPanel(new BorderLayout(10, 10));
+                JPanel infoPanel = new JPanel(new GridLayout(4, 1));
+
+                infoPanel.add(new JLabel("Name: " + selectedItem.getName()));
+                infoPanel.add(new JLabel("Category: " + selectedItem.getCategory()));
+                infoPanel.add(new JLabel("Price: $" + selectedItem.getPrice()));
+                infoPanel.add(new JLabel("Stock: " + selectedItem.getStock()));
+
+                previewPanel.add(infoPanel, BorderLayout.CENTER);
+
+                // Add image if path exists
+                String imagePath = selectedItem.getImagePath();
+                if (imagePath != null && !imagePath.isEmpty()) {
+                    try {
+                        ImageIcon imageIcon = new ImageIcon(imagePath);
+                        Image image = imageIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                        JLabel imageLabel = new JLabel(new ImageIcon(image));
+                        previewPanel.add(imageLabel, BorderLayout.WEST);
+                    } catch (Exception ex) {
+                        previewPanel.add(new JLabel("Image could not be loaded."), BorderLayout.WEST);
+                    }
+                } else {
+                    previewPanel.add(new JLabel("No image available."), BorderLayout.WEST);
+                }
+
+
+                JOptionPane.showMessageDialog(frame, previewPanel, "Item Preview", JOptionPane.PLAIN_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select an item first.");
+            }
+        });
+
+
         categoryFilter.addActionListener(e -> {
             String selectedCategory = (String) categoryFilter.getSelectedItem();
             updateItemSelector(itemSelector, itemsArea, selectedCategory);
@@ -183,6 +224,7 @@ public class StoreUI {
         actionPanel.add(addButton);
         actionPanel.add(viewCartButton);
         actionPanel.add(adminButton);
+        actionPanel.add(previewButton);
 
         bottomPanel.add(filterPanel);
         bottomPanel.add(actionPanel);
@@ -234,11 +276,13 @@ public class StoreUI {
             JTextField priceField = new JTextField();
             JTextField categoryField = new JTextField();
             JTextField stockField = new JTextField();
+            JTextField imageField = new JTextField();
             Object[] inputs = {
                     "Name:", nameField,
                     "Price:", priceField,
                     "Category:", categoryField,
-                    "Stock:", stockField
+                    "Stock:", stockField,
+                    "Image:", imageField
             };
 
             int result = JOptionPane.showConfirmDialog(adminDialog, inputs, "Add New Item", JOptionPane.OK_CANCEL_OPTION);
@@ -248,7 +292,8 @@ public class StoreUI {
                     double price = Double.parseDouble(priceField.getText());
                     String category = categoryField.getText();
                     int stock = Integer.parseInt(stockField.getText());
-                    ClothingItem newItem = new ClothingItem(name, category, price, stock);
+                    String image = imageField.getText();
+                    ClothingItem newItem = new ClothingItem(name, category, price, stock, image);
                     inventoryManager.addItem(newItem);
                     listModel.addElement(newItem);
                     updateItemSelector(itemSelector, itemsArea, currentCategory);

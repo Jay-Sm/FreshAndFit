@@ -5,12 +5,14 @@ public class ClothingItem {
     private String category;
     private double price;
     private int stock;
+    private String imagePath;
 
-    public ClothingItem(String name, String category, double price, int stock) {
+    public ClothingItem(String name, String category, double price, int stock, String imagePath) {
         this.name = name;
         this.category = category;
         this.price = price;
         this.stock = stock;
+        this.imagePath = imagePath;
     }
 
     public String getName() {
@@ -27,6 +29,10 @@ public class ClothingItem {
 
     public int getStock() {
         return stock;
+    }
+
+    public String getImagePath() {
+        return imagePath;
     }
 
     @Override
@@ -50,4 +56,7 @@ public class ClothingItem {
         this.stock = stock;
     }
 
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
 }

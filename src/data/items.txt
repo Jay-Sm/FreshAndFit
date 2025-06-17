@@ -1,5 +1,5 @@
-Basic T-Shirt,Shirts,19.99,10
-Slim Jeans,Pants,39.99,5
+Basic T-Shirt,Shirts,19.99,10,src/data/images/tshirt.jpg
+Slim Jeans,Pants,39.99,5,src/data/images/slimjeans.jpg
 Beanie,Accessories,9.99,8
 Hoodie,Shirts,29.99,5
 Sneakers,Shoes,59.99,3
