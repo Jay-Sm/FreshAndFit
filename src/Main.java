@@ -5,3 +5,4 @@ public class Main {
         javax.swing.SwingUtilities.invokeLater(StoreUI::new);
     }
 }
+

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="FreshAndFit:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/FreshAndFit_jar</output-path>
+    <root id="archive" name="FreshAndFit.jar">
+      <element id="module-output" name="FreshAndFit" />
+    </root>
+  </artifact>
+</component>

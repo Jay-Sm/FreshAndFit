@@ -46,6 +46,4 @@ public class InventoryManager {
     public void removeItem(ClothingItem item) {
         inventory.remove(item);
     }
-
-
 }

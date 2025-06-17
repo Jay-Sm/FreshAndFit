@@ -6,15 +6,33 @@ import models.ClothingItem;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.io.File;
 
 public class StoreUI {
     private InventoryManager inventoryManager;
     private CartManager cartManager;
 
+    public static String getAppRootPath() {
+        try {
+            return new File(StoreUI.class.getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .toURI()).getParent();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ".";
+        }
+    }
+
     public StoreUI() {
         inventoryManager = new InventoryManager();
-        inventoryManager.loadInventory("src/data/items.txt");
+        String root = getAppRootPath();
+        String dataPath = root + File.separator + "FreshAndFit\\data" + File.separator + "items.txt";
+        inventoryManager.loadInventory(dataPath);
+
+        System.out.println(dataPath);
+        System.out.println(root);
+
 
         cartManager = new CartManager();
         createAndShowGUI();
