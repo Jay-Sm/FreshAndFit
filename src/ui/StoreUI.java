@@ -313,6 +313,7 @@ public class StoreUI {
                     String image = imageField.getText();
                     ClothingItem newItem = new ClothingItem(name, category, price, stock, image);
                     inventoryManager.addItem(newItem);
+                    inventoryManager.saveInventory("C:/Users/Jordan/IdeaProjects/FreshAndFit/out/production/FreshAndFit/data/items.txt");
                     listModel.addElement(newItem);
                     updateItemSelector(itemSelector, itemsArea, currentCategory);
                 } catch (NumberFormatException ex) {
@@ -326,6 +327,7 @@ public class StoreUI {
             ClothingItem selected = itemList.getSelectedValue();
             if (selected != null) {
                 inventoryManager.removeItem(selected);
+                inventoryManager.saveInventory("C:/Users/Jordan/IdeaProjects/FreshAndFit/out/production/FreshAndFit/data/items.txt");
                 listModel.removeElement(selected);
                 updateItemSelector(itemSelector, itemsArea, currentCategory);
             }

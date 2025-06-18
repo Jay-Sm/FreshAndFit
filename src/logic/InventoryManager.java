@@ -46,4 +46,21 @@ public class InventoryManager {
     public void removeItem(ClothingItem item) {
         inventory.remove(item);
     }
+
+    public void saveInventory(String filepath) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filepath))) {
+            for (ClothingItem item : inventory) {
+                writer.printf("%s,%s,%.2f,%d,%s%n",
+                        item.getName(),
+                        item.getCategory(),
+                        item.getPrice(),
+                        item.getStock(),
+                        item.getImagePath()
+                );
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to save inventory: " + e.getMessage());
+        }
+    }
+
 }
