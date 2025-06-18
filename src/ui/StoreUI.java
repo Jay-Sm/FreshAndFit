@@ -63,11 +63,21 @@ public class StoreUI {
         }
     }
 
+
+
     private void createAndShowGUI() {
         JFrame frame = new JFrame("Fit & Fresh Clothing Store");
 
-        String[] categories = {"All", "Shirts", "Pants", "Accessories", "Shoes"};
-        JComboBox<String> categoryFilter = new JComboBox<>(categories);
+        java.util.Set<String> categorySet = new java.util.HashSet<>();
+        for (ClothingItem item : inventoryManager.getInventory()) {
+            categorySet.add(item.getCategory());
+        }
+
+        java.util.List<String> categoryList = new java.util.ArrayList<>(categorySet);
+        java.util.Collections.sort(categoryList); // optional alphabetical sorting
+        categoryList.add(0, "All"); // Add 'All' at the top
+
+        JComboBox<String> categoryFilter = new JComboBox<>(categoryList.toArray(new String[0]));
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 500);

@@ -3,3 +3,4 @@ Slim Jeans,Pants,39.99,5,src/data/images/slimjeans.jpg
 Beanie,Accessories,9.99,8,src/data/images/beanie.png
 Hoodie,Shirts,29.99,5,src/data/images/hoodie.png
 Sneakers,Shoes,59.99,3,src/data/images/sneakers.png
+Classical Polo,NewShirts,49.99,5,src/data/images/tshirt.jpg
