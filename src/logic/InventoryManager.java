@@ -11,29 +11,30 @@ public class InventoryManager {
         inventory = new ArrayList<>();
     }
 
-    public void loadInventory(String filename) {
+    public void loadInventory(String filepath) {
         inventory.clear();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length >= 5) {
+                if (parts.length == 5) {
                     String name = parts[0].trim();
                     String category = parts[1].trim();
                     double price = Double.parseDouble(parts[2].trim());
                     int stock = Integer.parseInt(parts[3].trim());
                     String imagePath = parts[4].trim();
 
-                    ClothingItem item = new ClothingItem(name, category, price, stock, imagePath);
-                    inventory.add(item);
+                    // Clamp to non-negative values
+                    price = Math.max(price, 0);
+                    stock = Math.max(stock, 0);
+
+                    inventory.add(new ClothingItem(name, category, price, stock, imagePath));
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Error loading inventory: " + e.getMessage());
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Failed to load inventory: " + e.getMessage());
         }
     }
-
 
     public List<ClothingItem> getInventory() {
         return inventory;

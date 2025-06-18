@@ -306,18 +306,26 @@ public class StoreUI {
             int result = JOptionPane.showConfirmDialog(adminDialog, inputs, "Add New Item", JOptionPane.OK_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
                 try {
-                    String name = nameField.getText();
-                    double price = Double.parseDouble(priceField.getText());
-                    String category = categoryField.getText();
-                    int stock = Integer.parseInt(stockField.getText());
-                    String image = imageField.getText();
+                    String name = nameField.getText().trim();
+                    double price = Double.parseDouble(priceField.getText().trim());
+                    String category = categoryField.getText().trim();
+                    int stock = Integer.parseInt(stockField.getText().trim());
+                    String image = imageField.getText().trim();
+
+                    // Prevent negative values
+                    if (price < 0 || stock < 0) {
+                        JOptionPane.showMessageDialog(adminDialog, "Price and stock must be non-negative.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
                     ClothingItem newItem = new ClothingItem(name, category, price, stock, image);
                     inventoryManager.addItem(newItem);
                     inventoryManager.saveInventory("C:/Users/Jordan/IdeaProjects/FreshAndFit/out/production/FreshAndFit/data/items.txt");
                     listModel.addElement(newItem);
                     updateItemSelector(itemSelector, itemsArea, currentCategory);
+
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(adminDialog, "Invalid price input.");
+                    JOptionPane.showMessageDialog(adminDialog, "Please enter valid numeric values for price and stock.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -347,23 +355,37 @@ public class StoreUI {
                         "Category:", categoryField,
                         "Stock:", stockField
                 };
-                selected.setStock(Integer.parseInt(stockField.getText()));
 
                 int result = JOptionPane.showConfirmDialog(adminDialog, inputs, "Edit Item", JOptionPane.OK_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
                     try {
-                        selected.setName(nameField.getText());
-                        selected.setPrice(Double.parseDouble(priceField.getText()));
-                        selected.setCategory(categoryField.getText());
-                        selected.setStock(Integer.parseInt(stockField.getText()));
+                        String name = nameField.getText().trim();
+                        double price = Double.parseDouble(priceField.getText().trim());
+                        String category = categoryField.getText().trim();
+                        int stock = Integer.parseInt(stockField.getText().trim());
+
+                        if (price < 0 || stock < 0) {
+                            JOptionPane.showMessageDialog(adminDialog, "Price and stock must be non-negative.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        selected.setName(name);
+                        selected.setPrice(price);
+                        selected.setCategory(category);
+                        selected.setStock(stock);
+
+                        inventoryManager.saveInventory("C:/Users/Jordan/IdeaProjects/FreshAndFit/out/production/FreshAndFit/data/items.txt");
+
                         itemList.repaint();
                         updateItemSelector(itemSelector, itemsArea, currentCategory);
+
                     } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(adminDialog, "Invalid price input.");
+                        JOptionPane.showMessageDialog(adminDialog, "Please enter valid numeric values for price and stock.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
         });
+
 
         adminDialog.setLocationRelativeTo(parentFrame);
         adminDialog.setVisible(true);
