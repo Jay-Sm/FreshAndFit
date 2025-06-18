@@ -37,6 +37,31 @@ public class StoreUI {
         }
     }
 
+    private void refreshCategoryFilter(JComboBox<String> categoryFilter) {
+        java.util.Set<String> categorySet = new java.util.HashSet<>();
+        for (ClothingItem item : inventoryManager.getInventory()) {
+            categorySet.add(item.getCategory());
+        }
+
+        java.util.List<String> categoryList = new java.util.ArrayList<>(categorySet);
+        java.util.Collections.sort(categoryList);
+        categoryList.add(0, "All");
+
+        String selectedCategory = (String) categoryFilter.getSelectedItem();
+
+        categoryFilter.removeAllItems();
+        for (String category : categoryList) {
+            categoryFilter.addItem(category);
+        }
+
+        // Restore previous selection if possible
+        if (selectedCategory != null && categoryList.contains(selectedCategory)) {
+            categoryFilter.setSelectedItem(selectedCategory);
+        } else {
+            categoryFilter.setSelectedItem("All");
+        }
+    }
+
     public StoreUI() {
         inventoryManager = new InventoryManager();
         String root = getAppRootPath();
@@ -56,14 +81,12 @@ public class StoreUI {
         itemsArea.setText("Available Products:\n");
 
         for (ClothingItem item : inventoryManager.getInventory()) {
-            if (filterCategory.equals("All") || item.getCategory().equalsIgnoreCase(filterCategory)) {
+            if ("All".equals(filterCategory) || (filterCategory != null && filterCategory.equals(item.getCategory()))) {
                 itemSelector.addItem(item.toString());
                 itemsArea.append(item.toString() + "\n");
             }
         }
     }
-
-
 
     private void createAndShowGUI() {
         JFrame frame = new JFrame("Fit & Fresh Clothing Store");
@@ -99,7 +122,7 @@ public class StoreUI {
         JButton adminButton = new JButton("Admin Panel", loadIcon("admin_settings.png", 16, 16));
         adminButton.addActionListener(e -> {
             String selectedCategory = (String) categoryFilter.getSelectedItem();
-            showAdminPanel(frame, itemSelector, itemsArea, selectedCategory);
+            showAdminPanel(frame, itemSelector, itemsArea, selectedCategory, categoryFilter);
         });
 
         JButton previewButton = new JButton("Preview Item", loadIcon("preview.png", 16, 16));
@@ -304,7 +327,7 @@ public class StoreUI {
 
     }
 
-    private void showAdminPanel(JFrame parentFrame, JComboBox<String> itemSelector, JTextArea itemsArea, String currentCategory) {
+    private void showAdminPanel(JFrame parentFrame, JComboBox<String> itemSelector, JTextArea itemsArea, String currentCategory, JComboBox<String> categoryFilter) {
         JDialog adminDialog = new JDialog(parentFrame, "Admin Panel", true);
         adminDialog.setSize(400, 300);
         adminDialog.setLayout(new BorderLayout());
@@ -367,6 +390,7 @@ public class StoreUI {
                     inventoryManager.saveInventory("C:/Users/Jordan/IdeaProjects/FreshAndFit/out/production/FreshAndFit/data/items.txt");
                     listModel.addElement(newItem);
                     updateItemSelector(itemSelector, itemsArea, currentCategory);
+                    refreshCategoryFilter(categoryFilter);
 
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(adminDialog, "Please enter valid numeric values for price and stock.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
@@ -382,6 +406,7 @@ public class StoreUI {
                 inventoryManager.saveInventory("C:/Users/Jordan/IdeaProjects/FreshAndFit/out/production/FreshAndFit/data/items.txt");
                 listModel.removeElement(selected);
                 updateItemSelector(itemSelector, itemsArea, currentCategory);
+                refreshCategoryFilter(categoryFilter);
             }
         });
 
@@ -422,6 +447,7 @@ public class StoreUI {
 
                         itemList.repaint();
                         updateItemSelector(itemSelector, itemsArea, currentCategory);
+                        refreshCategoryFilter(categoryFilter);
 
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(adminDialog, "Please enter valid numeric values for price and stock.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
