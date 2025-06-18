@@ -24,6 +24,19 @@ public class StoreUI {
         }
     }
 
+    private ImageIcon loadIcon(String fileName, int width, int height) {
+        try {
+            String root = getAppRootPath();
+            String path = root + File.separator + "FreshAndFit" + File.separator + "data" + File.separator + "icons" + File.separator + fileName;
+            ImageIcon icon = new ImageIcon(path);
+            Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaledImage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public StoreUI() {
         inventoryManager = new InventoryManager();
         String root = getAppRootPath();
@@ -57,7 +70,7 @@ public class StoreUI {
         JComboBox<String> categoryFilter = new JComboBox<>(categories);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(700, 500);
+        frame.setSize(800, 500);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
@@ -70,16 +83,16 @@ public class StoreUI {
             itemSelector.addItem(item.toString());
         }
 
-        JButton addButton = new JButton("Add to Cart");
-        JButton viewCartButton = new JButton("View Cart");
+        JButton addButton = new JButton("Add to Cart", loadIcon("add_to_cart.png", 16, 16));
+        JButton viewCartButton = new JButton("View Cart", loadIcon("view_cart.png", 16, 16));
 
-        JButton adminButton = new JButton("Admin Panel");
+        JButton adminButton = new JButton("Admin Panel", loadIcon("admin_settings.png", 16, 16));
         adminButton.addActionListener(e -> {
             String selectedCategory = (String) categoryFilter.getSelectedItem();
             showAdminPanel(frame, itemSelector, itemsArea, selectedCategory);
         });
 
-        JButton previewButton = new JButton("Preview Item");
+        JButton previewButton = new JButton("Preview Item", loadIcon("preview.png", 16, 16));
 
         addButton.addActionListener(e -> {
             int selectedIndex = itemSelector.getSelectedIndex();
@@ -121,20 +134,33 @@ public class StoreUI {
             }
             cartDisplay.append("\nTotal Cost: $").append(String.format("%.2f", totalCost));
 
-            String[] options = {"Remove Item", "Checkout", "Cancel"};
+            // Create a custom dialog
+            JDialog cartDialog = new JDialog(frame, "Shopping Cart", true);
+            cartDialog.setSize(400, 300);
+            cartDialog.setLayout(new BorderLayout());
 
-            int choice = JOptionPane.showOptionDialog(
-                    frame,
-                    cartDisplay.toString(),
-                    "Shopping Cart",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE,
-                    null,
-                    options,
-                    options[2]
-            );
+            JTextArea cartTextArea = new JTextArea(cartDisplay.toString());
+            cartTextArea.setEditable(false);
+            cartDialog.add(new JScrollPane(cartTextArea), BorderLayout.CENTER);
 
-            if (choice == 0) { // Remove Item
+            JPanel buttonPanel = new JPanel();
+
+            JButton removeFromCartBtn = new JButton("Remove Item", loadIcon("remove_from_cart.png", 16, 16));
+            JButton checkoutBtn = new JButton("Checkout", loadIcon("checkout.png", 16, 16));
+            JButton closeBtn = new JButton("Cancel");
+
+            buttonPanel.add(removeFromCartBtn);
+            buttonPanel.add(checkoutBtn);
+            buttonPanel.add(closeBtn);
+
+            cartDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+            // Remove item button logic
+            removeFromCartBtn.addActionListener(ev -> {
+                if (cartItems.isEmpty()) {
+                    JOptionPane.showMessageDialog(cartDialog, "Cart is empty.");
+                    return;
+                }
 
                 String[] itemOptions = new String[cartItems.size()];
                 for (int i = 0; i < cartItems.size(); i++) {
@@ -142,7 +168,7 @@ public class StoreUI {
                 }
 
                 String selected = (String) JOptionPane.showInputDialog(
-                        frame,
+                        cartDialog,
                         "Select an item to remove:",
                         "Remove Item",
                         JOptionPane.PLAIN_MESSAGE,
@@ -159,33 +185,41 @@ public class StoreUI {
                             // Increase stock by 1
                             item.setStock(item.getStock() + 1);
 
-                            // Update UI to show new stock
+                            // Update UI and cart view
                             String selectedCategory = (String) categoryFilter.getSelectedItem();
                             updateItemSelector(itemSelector, itemsArea, selectedCategory);
-
-                            JOptionPane.showMessageDialog(frame, item.getName() + " removed from cart.");
+                            cartDialog.dispose();
+                            viewCartButton.doClick(); // reopen with updated data
                             break;
                         }
                     }
                 }
+            });
 
-            } else if (choice == 1) { // Checkout
+            // Checkout button logic
+            double finalTotalCost = totalCost;
+            checkoutBtn.addActionListener(ev -> {
                 int confirm = JOptionPane.showConfirmDialog(
-                        frame,
-                        "Confirm purchase for $" + String.format("%.2f", totalCost) + "?",
+                        cartDialog,
+                        "Confirm purchase for $" + String.format("%.2f", finalTotalCost) + "?",
                         "Confirm Checkout",
                         JOptionPane.YES_NO_OPTION
                 );
 
                 if (confirm == JOptionPane.YES_OPTION) {
                     cartManager.clearCart();
+                    cartDialog.dispose();
                     JOptionPane.showMessageDialog(frame, "Thank you for your purchase!");
                 }
-            }
-            // If cancel or closed, do nothing
+            });
 
+            // Close dialog
+            closeBtn.addActionListener(ev -> cartDialog.dispose());
 
+            cartDialog.setLocationRelativeTo(frame);
+            cartDialog.setVisible(true);
         });
+
 
         previewButton.addActionListener(e -> {
             int selectedIndex = itemSelector.getSelectedIndex();
@@ -276,9 +310,9 @@ public class StoreUI {
         JScrollPane itemScrollPane = new JScrollPane(itemList);
 
         // Buttons
-        JButton addItemButton = new JButton("Add Item");
-        JButton removeItemButton = new JButton("Remove Item");
-        JButton editItemButton = new JButton("Edit Item");
+        JButton addItemButton = new JButton("Add Item", loadIcon("add_item.png", 16, 16));
+        JButton removeItemButton = new JButton("Remove Item", loadIcon("remove_item.png", 16, 16));
+        JButton editItemButton = new JButton("Edit Item", loadIcon("edit_item.png", 16, 16));
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(addItemButton);
