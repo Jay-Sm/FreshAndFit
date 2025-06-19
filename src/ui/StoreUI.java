@@ -54,7 +54,7 @@ public class StoreUI {
             categoryFilter.addItem(category);
         }
 
-        // Restore previous selection if possible
+        // Restore previous selection, if possible
         if (selectedCategory != null && categoryList.contains(selectedCategory)) {
             categoryFilter.setSelectedItem(selectedCategory);
         } else {
@@ -97,8 +97,8 @@ public class StoreUI {
         }
 
         java.util.List<String> categoryList = new java.util.ArrayList<>(categorySet);
-        java.util.Collections.sort(categoryList); // optional alphabetical sorting
-        categoryList.add(0, "All"); // Add 'All' at the top
+        java.util.Collections.sort(categoryList); // Optional alphabetical sorting
+        categoryList.add(0, "All"); // To add 'All' at the top of the filter
 
         JComboBox<String> categoryFilter = new JComboBox<>(categoryList.toArray(new String[0]));
 
@@ -139,7 +139,7 @@ public class StoreUI {
 
                 cartManager.addToCart(selectedItem);
 
-                // Update UI to reflect new stock
+                // Update UI to show the new stock value
                 String selectedCategory = (String) categoryFilter.getSelectedItem();
                 updateItemSelector(itemSelector, itemsArea, selectedCategory);
 
@@ -155,7 +155,7 @@ public class StoreUI {
                 return;
             }
 
-            // Build the cart display string + total cost
+            // The cart display string + total cost
             StringBuilder cartDisplay = new StringBuilder();
             double totalCost = 0;
             for (ClothingItem item : cartItems) {
@@ -164,7 +164,6 @@ public class StoreUI {
             }
             cartDisplay.append("\nTotal Cost: $").append(String.format("%.2f", totalCost));
 
-            // Create a custom dialog
             JDialog cartDialog = new JDialog(frame, "Shopping Cart", true);
             cartDialog.setSize(400, 300);
             cartDialog.setLayout(new BorderLayout());
@@ -219,7 +218,7 @@ public class StoreUI {
                             String selectedCategory = (String) categoryFilter.getSelectedItem();
                             updateItemSelector(itemSelector, itemsArea, selectedCategory);
                             cartDialog.dispose();
-                            viewCartButton.doClick(); // reopen with updated data
+                            viewCartButton.doClick(); // Reopen with updated data
                             break;
                         }
                     }
