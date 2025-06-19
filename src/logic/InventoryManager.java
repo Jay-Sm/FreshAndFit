@@ -64,4 +64,16 @@ public class InventoryManager {
         }
     }
 
+    public boolean decreaseStock(ClothingItem item, int amount) {
+        if (item.getStock() >= amount) {
+            item.setStock(item.getStock() - amount);
+            return true;
+        }
+        return false;
+    }
+
+    public void increaseStock(ClothingItem item, int amount) {
+        item.setStock(item.getStock() + amount);
+    }
+
 }

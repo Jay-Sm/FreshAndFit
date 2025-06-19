@@ -132,15 +132,12 @@ public class StoreUI {
             if (selectedIndex >= 0) {
                 ClothingItem selectedItem = inventoryManager.getInventory().get(selectedIndex);
 
-                if (selectedItem.getStock() <= 0) {
+                if (!inventoryManager.decreaseStock(selectedItem, 1)) {
                     JOptionPane.showMessageDialog(frame, "Sorry, " + selectedItem.getName() + " is out of stock.", "Out of Stock", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
                 cartManager.addToCart(selectedItem);
-
-                // Reduce stock by 1 when added to cart
-                selectedItem.setStock(selectedItem.getStock() - 1);
 
                 // Update UI to reflect new stock
                 String selectedCategory = (String) categoryFilter.getSelectedItem();
@@ -215,8 +212,8 @@ public class StoreUI {
                         if (item.toString().equals(selected)) {
                             cartManager.removeFromCart(item);
 
-                            // Increase stock by 1
-                            item.setStock(item.getStock() + 1);
+                            // Call InventoryManager to increase stock by 1
+                            inventoryManager.increaseStock(item, 1);
 
                             // Update UI and cart view
                             String selectedCategory = (String) categoryFilter.getSelectedItem();
