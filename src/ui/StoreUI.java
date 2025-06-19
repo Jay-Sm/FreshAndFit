@@ -269,9 +269,13 @@ public class StoreUI {
 
                 // Add image if path exists
                 String imagePath = selectedItem.getImagePath();
+
+                System.out.println(getAppRootPath() + File.separator + "FreshAndFit" + File.separator + imagePath);
+
                 if (imagePath != null && !imagePath.isEmpty()) {
                     try {
-                        ImageIcon imageIcon = new ImageIcon(imagePath);
+                        String fullImagePath = getAppRootPath() + File.separator + "FreshAndFit" + File.separator + imagePath;
+                        ImageIcon imageIcon = new ImageIcon(fullImagePath);
                         Image image = imageIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                         JLabel imageLabel = new JLabel(new ImageIcon(image));
                         previewPanel.add(imageLabel, BorderLayout.WEST);
